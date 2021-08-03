@@ -2,7 +2,6 @@ let player = {
   name: "",
   chips: 100,
 };
-
 let cards = [];
 let dealCards = [];
 let sum = 0;
@@ -10,6 +9,7 @@ let dealSum = 0;
 let hasBlackJack = false;
 let isAlive = false;
 let message = "";
+let hasStand = false;
 const messageEl = document.getElementById("message-el");
 const sumEl = document.getElementById("sum-el");
 const cardsEl = document.getElementById("cards-el");
@@ -25,6 +25,8 @@ const dealSumTxt = document.getElementById("sum-deal");
 const holdBtn = document.getElementById("hold-btn");
 
 newGameBtn.textContent = "START GAME";
+newCardBtn.disabled = true;
+holdBtn.disabled = true;
 
 submitName.addEventListener("click", function addPlayerName() {
   player.name = inputEl.value;
@@ -50,6 +52,7 @@ newGameBtn.addEventListener("click", function startGame() {
   isAlive = true;
   message = "";
   hasBlackJack = false;
+  hasStand = false;
   const firstCard = getRandomCard();
   const secondCard = getRandomCard();
   cards = [firstCard, secondCard];
@@ -58,6 +61,7 @@ newGameBtn.addEventListener("click", function startGame() {
   const secondDealerCard = getRandomCard();
   dealCards = [firstDealerCard, secondDealerCard];
   dealSum = firstDealerCard + secondDealerCard;
+  dealSumTxt.textContent = "";
   renderGame();
 });
 
@@ -67,16 +71,24 @@ function renderGame() {
     cardsEl.textContent += card + " ";
   });
   dealCardTxt.textContent = "Dealer cards: ";
-  dealCards.forEach((dealCards) => {
-    dealCardTxt.textContent += dealCards + " ";
-  });
+  if (hasStand === true) {
+    renderDealCards();
+  } else if (hasStand === false) {
+    dealCardTxt.textContent =
+      "Deal Cards: " + dealCards[1]
+        ? "Dealer Cards:  Hidden " + dealCards[1]
+        : "waiting for game to start";
+  }
   sumEl.textContent = "Sum: " + sum;
-  dealSumTxt.textContent = "Dealer sum: " + dealSum;
+  newCardBtn.disabled = false;
+  holdBtn.disabled = false;
   switch (true) {
     case dealSum === 21:
       message = "House wins";
+      hasStand = true;
       isAlive = false;
       newGameBtn.textContent = "NEW GAME";
+      renderDealCards();
       chipsCount();
       break;
     case sum === 21:
@@ -84,6 +96,7 @@ function renderGame() {
       hasBlackJack = true;
       isAlive = false;
       newGameBtn.textContent = "NEW GAME";
+      renderDealCards();
       chipsCount();
       break;
     case sum < 21 && dealSum < 17:
@@ -91,9 +104,11 @@ function renderGame() {
       chipsCount();
       break;
     case dealSum === sum:
+      hasStand = true;
       message = "Push!";
       isAlive = false;
       newGameBtn.textContent = "NEW GAME";
+      renderDealCards();
       break;
     case dealSum > 21:
       message = "You win";
@@ -103,21 +118,27 @@ function renderGame() {
       chipsCount();
       break;
     case sum > 21:
+      hasStand = false;
       message = "House wins";
       isAlive = false;
       newGameBtn.textContent = "NEW GAME";
+      renderDealCards();
       chipsCount();
       break;
     case dealSum < 22 && dealSum > 16 && sum > 21:
       message = "House wins";
       isAlive = false;
       newGameBtn.textContent = "NEW GAME";
+      renderDealCards();
       chipsCount();
       break;
     default:
       return;
   }
-
+  if (isAlive === false) {
+    newCardBtn.disabled = true;
+    holdBtn.disabled = true;
+  }
   messageEl.textContent = message;
   console.log(
     "is alive",
@@ -128,11 +149,23 @@ function renderGame() {
     sum,
     "dealsum",
     dealSum,
-    message
+    "has stand",
+    hasStand
   );
 }
 
+newCardBtn.addEventListener("click", function newCard() {
+  if (isAlive === true && hasBlackJack === false) {
+    let card = getRandomCard();
+    sum += card;
+    cards.push(card);
+    renderGame();
+  }
+});
+
 holdBtn.addEventListener("click", function standCards() {
+  hasStand = true;
+  renderDealCards();
   if (isAlive === true && dealSum < 17) {
     let newDealerCard = getRandomCard();
     dealSum += newDealerCard;
@@ -143,47 +176,21 @@ holdBtn.addEventListener("click", function standCards() {
     isAlive = false;
     newGameBtn.textContent = "NEW GAME";
     chipsCount();
-    console.log(
-      "is alive",
-      isAlive,
-      "has blackjack",
-      hasBlackJack,
-      "sum",
-      sum,
-      "dealsum",
-      dealSum,
-      message
-    );
   } else if (dealSum >= 17 && sum < 22 && dealSum < sum) {
     message = "You win";
     isAlive = false;
     hasBlackJack = true;
     newGameBtn.textContent = "NEW GAME";
     chipsCount();
-    console.log(
-      "is alive",
-      isAlive,
-      "has blackjack",
-      hasBlackJack,
-      "sum",
-      sum,
-      "dealsum",
-      dealSum,
-      message
-    );
   } else {
     renderGame();
   }
-  messageEl.textContent = message;
-});
-
-newCardBtn.addEventListener("click", function newCard() {
-  if (isAlive === true && hasBlackJack === false) {
-    let card = getRandomCard();
-    sum += card;
-    cards.push(card);
-    renderGame();
+  if (isAlive === false) {
+    holdBtn.disabled = true;
+    newCardBtn.disabled = true;
   }
+  messageEl.textContent = message;
+  console.log("has stand", hasStand);
 });
 
 function chipsCount() {
@@ -197,4 +204,11 @@ function chipsCount() {
   if (player.chips === 0) {
     messageEl.textContent = "You're out of chips!";
   }
+}
+function renderDealCards() {
+  dealCardTxt.textContent = "Dealer Cards: ";
+  dealCards.forEach((dealCard) => {
+    dealCardTxt.textContent += dealCard + " ";
+  });
+  dealSumTxt.textContent = "Dealer sum: " + dealSum;
 }
