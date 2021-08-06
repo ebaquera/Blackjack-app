@@ -1,5 +1,6 @@
-import "./index.js"
+import script from "./index.js"
 const Body = () =>{
+    script();
     return (
         <div>
         <h1>Blackjack</h1>
@@ -18,7 +19,6 @@ const Body = () =>{
         <p id="sum-el">Sum:</p>
         <p id="player-el"></p>
         <p id="chips-el"></p>
-        <script src="index.js"></script>
         </div>
         )
     }
