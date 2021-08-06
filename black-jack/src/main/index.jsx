@@ -1,6 +1,10 @@
 import script from "./index.js"
+import React from 'react'
 const Body = () =>{
-    script();
+    React.useEffect(()=>{
+        script();
+    },[])
+    
     return (
         <div>
         <h1>Blackjack</h1>
@@ -8,7 +12,7 @@ const Body = () =>{
         <p id="dealer-card">Dealer Cards:</p>
         <p id='sum-deal'></p>
         <p id="message-el">Want to play a round?</p>
-        <button id='start-btn'>START</button>
+        <button id='start-btn'>START GAME</button>
         <button id = 'new-card'>HIT</button>
         <button id = 'hold-btn'>STAND</button>
         <br/>

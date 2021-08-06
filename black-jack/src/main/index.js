@@ -26,7 +26,6 @@ export default function script() {
     const dealSumTxt = document.getElementById("sum-deal");
     const holdBtn = document.getElementById("hold-btn");
 
-    newGameBtn.textContent = "START GAME";
     newCardBtn.disabled = true;
     holdBtn.disabled = true;
 
@@ -142,10 +141,11 @@ export default function script() {
         holdBtn.disabled = true;
       }
       messageEl.textContent = message;
-    }
-    if (player.chips === 0) {
-      isAlive = false;
-      messageEl.textContent = "Game Over!";
+      if (player.chips === 0) {
+        isAlive = false;
+        messageEl.textContent = "Game Over! Refresh to start again";
+        newGameBtn.disabled = true;
+      }
     }
 
     newCardBtn.addEventListener("click", function newCard() {
